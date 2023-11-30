@@ -14,9 +14,9 @@ Additionally, the datasets are removed however, the classification dataset Celeb
 For best demonstration and understanding of how to use, refer to the notebooks found in `examples`. 
 
 Explaining classification scores can be found in `examples/classification`. The dataset used is CelebA.
-Explaining object detection through detection scores can be found in `examples/detection/main.ipynb`. The dataset used here is NEA Rodent dataset.
+Explaining object detection through detection scores can be found in `examples/detection`. The dataset used here is NEA Rodent dataset.
 
-However, as a high level API, you can interact with it like so:
+Here are some high level API snippets:
 ```
 # We have some hand labelled segmentations. Let's use these to generate some more!
 from explain_anything.segmenters import FeatureSegmenter
