@@ -1,24 +1,33 @@
-# Explain Anything 🎩
+# **Explain Anything** :top-hat:
 
 Explaining any model through user-defined concepts
 
 ---
 
-## Setup
-Dockerfile and run scripts are provided. Simply `docker build . -t explain_anything` and perform `sudo bash run_docker.sh`.
+## **Setup**
+Dockerfile and run scripts are provided. Simply build with
+```bash
+docker build . -t explain_anything
+```
+
+and run the container via
+
+```bash
+sudo bash run_docker.sh
+```
 
 Please note that weights for the examples (only for the example ResNet and YOLO model, **SegGPT** is provided via Dockerfile) are **not available** in this repo and will have to be re-trained.
 
 Additionally, the datasets are removed however, the classification dataset CelebAMask-HQ is kept here for demonstration purposes (not full size, roughly *400 images*).
 
-## Usage
+## **Usage**
 For best demonstration and understanding of how to use, refer to the notebooks found in `examples`. 
 
 Explaining classification scores can be found in `examples/classification`. The dataset used is CelebA.
 Explaining object detection through detection scores can be found in `examples/detection`. The dataset used here is NEA Rodent dataset.
 
 Here are some high level API snippets:
-```
+```python
 # We have some hand labelled segmentations. Let's use these to generate some more!
 from explain_anything.segmenters import FeatureSegmenter
 
@@ -42,7 +51,7 @@ for image in ['img3.jpg', 'img4.jpg', 'img5.jpg']:
 ```
 
 Once we have gotten more samples and features, we can evaluate our model
-```
+```python
 from explain_anything.explain import ExA
 model = resnet50() # Note this model should only return a confidence score
 
