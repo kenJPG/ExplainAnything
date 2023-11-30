@@ -1,22 +1,23 @@
-# Explain Anything
+# Explain Anything 🎩
+
 Explaining any model through user-defined concepts
 
---- 
-### Setup
-Dockerfile and script to are provided. Simply `docker build . -t explain_anything` and perform `sudo bash run_docker.sh`.
+---
+
+## Setup
+Dockerfile and run scripts are provided. Simply `docker build . -t explain_anything` and perform `sudo bash run_docker.sh`.
 
 Please note that weights for the examples (only for the example ResNet and YOLO model, **SegGPT** is provided via Dockerfile) are **not available** in this repo and will have to be re-trained.
 
 Additionally, the datasets are removed however, the classification dataset CelebAMask-HQ is kept here for demonstration purposes (not full size, roughly *400 images*).
 
----
-### Usage
+## Usage
 For best demonstration and understanding of how to use, refer to the notebooks found in `examples`. 
 
 Explaining classification scores can be found in `examples/classification`. The dataset used is CelebA.
-Explaining object detection through detection scores can be found in `examples/detection/main.ipynb`. The dataset used here is NEA Rodent dataset.
+Explaining object detection through detection scores can be found in `examples/detection`. The dataset used here is NEA Rodent dataset.
 
-However, as a high level API, you can interact with it like so:
+Here are some high level API snippets:
 ```
 # We have some hand labelled segmentations. Let's use these to generate some more!
 from explain_anything.segmenters import FeatureSegmenter
