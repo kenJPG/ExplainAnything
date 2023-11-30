@@ -1,16 +1,16 @@
 # Explain Anything
 Explaining any model through user-defined concepts
 
---- 
-### Setup
-Dockerfile and script to are provided. Simply `docker build . -t explain_anything` and perform `sudo bash run_docker.sh`.
+--- <br>
+
+## Setup
+Dockerfile and run scripts are provided. Simply `docker build . -t explain_anything` and perform `sudo bash run_docker.sh`.
 
 Please note that weights for the examples (only for the example ResNet and YOLO model, **SegGPT** is provided via Dockerfile) are **not available** in this repo and will have to be re-trained.
 
 Additionally, the datasets are removed however, the classification dataset CelebAMask-HQ is kept here for demonstration purposes (not full size, roughly *400 images*).
 
----
-### Usage
+## Usage
 For best demonstration and understanding of how to use, refer to the notebooks found in `examples`. 
 
 Explaining classification scores can be found in `examples/classification`. The dataset used is CelebA.
