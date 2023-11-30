@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mask Drawing</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+<div class="p-10 max-w-lg mx-auto">
+    <input type="file" id="fileInput" class="mb-4">
+    <div>
+        <canvas id="canvas" width="512" height="512" class="border-2 border-gray-300 mb-4"></canvas>
+    </div>
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <label for="brushSize" class="mr-2">Brush Size:</label>
+            <input type="range" id="brushSize" min="1" max="50" value="5" class="mr-4">
+        </div>
+        <div>
+            <label for="componentInput" class="mr-2">Component:</label>
+            <input type="number" id="componentInput" min="0" max="9" value="0" class="mr-4">
+        </div>
+        <button id="eraser" onclick="toggleEraser()" class="mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
+            Brush Mode
+        </button>
+        <button onclick="saveMask()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded">
+            Save Mask
+        </button>
+    </div>
+</div>
+
+<script>
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+    let painting = false;
+    let layers = {};
+    let img = new Image();
+
+	function adjustCanvasDimensions() {
+		const maxDimension = 512;
+		if (img.width > img.height) {
+			canvas.width = maxDimension;
+			canvas.height = (img.height / img.width) * maxDimension;
+		} else {
+			canvas.height = maxDimension;
+			canvas.width = (img.width / img.height) * maxDimension;
+		}
+	}
+
+    function getLayer() {
+        let layerValue = document.getElementById('componentInput').value;
+        if (!layers[layerValue]) {
+            let newCanvas = document.createElement('canvas');
+            newCanvas.width = canvas.width;
+            newCanvas.height = canvas.height;
+            layers[layerValue] = newCanvas;
+        }
+        return layers[layerValue].getContext('2d');
+    }
+
+	function renderLayers() {
+		drawImageWithAspectRatio(); // Render the image first
+
+		let currentLayer = document.getElementById('componentInput').value;
+		if (layers[currentLayer]) {
+			ctx.drawImage(layers[currentLayer], 0, 0);
+		}
+	}
+
+
+    function getMousePos(canvas, evt) {
+        let rect = canvas.getBoundingClientRect();
+        let scaleX = canvas.width / rect.width;  // width ratio
+        let scaleY = canvas.height / rect.height; // height ratio
+        return {
+            x: (evt.clientX - rect.left) / scaleX,
+            y: (evt.clientY - rect.top) / scaleY
+        };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+		console.log('yo')
+        painting = true;
+        let pos = getMousePos(canvas, e);
+        let layerCtx = getLayer();
+        layerCtx.beginPath();
+        layerCtx.moveTo(pos.x, pos.y);
+    }, false);
+
+    canvas.addEventListener('mouseup', () => {
+        painting = false;
+        renderLayers();
+    });
+
+    let erasing = false;
+
+    function drawImageWithAspectRatio() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
+
+    function toggleEraser() {
+        erasing = !erasing;
+        if (erasing) {
+            $('#eraser').removeClass('bg-blue-500 hover:bg-blue-700').addClass('bg-red-500 hover:bg-red-700').html('Eraser Mode');
+        } else {
+            $('#eraser').addClass('bg-blue-500 hover:bg-blue-700').removeClass('bg-red-500 hover:bg-red-700').html('Brush Mode');
+        }
+    }
+
+    function draw(e) {
+        if (!painting) return;
+
+        let pos = getMousePos(canvas, e);
+        let brushSize = document.getElementById('brushSize').value;
+        let layerCtx = getLayer();
+
+        layerCtx.lineWidth = brushSize;
+        layerCtx.lineCap = 'round';
+
+        if (erasing) {
+            layerCtx.globalCompositeOperation = 'destination-out';
+            layerCtx.strokeStyle = 'rgba(0,0,0,1)';
+        } else {
+            layerCtx.globalCompositeOperation = 'source-over';
+            layerCtx.strokeStyle = document.getElementById('componentInput').value;
+        }
+
+        layerCtx.lineTo(pos.x, pos.y);
+        layerCtx.stroke();
+
+    }
+
+	document.getElementById('componentInput').addEventListener('change', function() {
+		// First, render all layers (with image)
+		renderLayers();
+
+		// Then, emphasize the currently selected layer (optional)
+		let currentLayer = document.getElementById('componentInput').value;
+		if (layers[currentLayer]) {
+			ctx.globalAlpha = 0.6;  // Lower the opacity to differentiate current layer (optional)
+			ctx.drawImage(layers[currentLayer], 0, 0);
+			ctx.globalAlpha = 1.0;  // Reset the opacity
+		}
+	});
+
+    canvas.addEventListener('mousemove', draw);
+
+	function saveMask() {
+		let finalCanvas = document.createElement('canvas');
+		finalCanvas.width = canvas.width;
+		finalCanvas.height = canvas.height;
+		let finalCtx = finalCanvas.getContext('2d');
+		
+		// console.log("layes:", layers)
+		let finalImgData = finalCtx.getImageData(0, 0, finalCanvas.width, finalCanvas.height);
+
+		for (let i = 0; i < 10; i++) {
+			if(layers[i]) {
+				let tempImgData = layers[i].getContext('2d').getImageData(0, 0, 512, 512);
+				for(let j = 3; j < tempImgData.data.length; j += 4) {
+					if(tempImgData.data[j] !== 0) {
+						let currentValue = i;
+						let existingValue = finalImgData.data[(j - 3)]; // Red channel
+						if (currentValue > existingValue) {
+							finalImgData.data[(j - 3)] = currentValue;
+							finalImgData.data[(j - 2)] = 0; // Green channel
+							finalImgData.data[(j - 1)] = 0; // Blue channel
+							finalImgData.data[j] = 255;    // Alpha channel
+						}
+					}
+				}
+			}
+		}
+
+		finalCtx.putImageData(finalImgData, 0, 0);
+
+
+		let imageData = finalCtx.getImageData(0, 0, finalCanvas.width, finalCanvas.height);
+		let singleChannelData = [];
+		for(let i = 0; i < imageData.data.length; i += 4) {
+			singleChannelData.push(imageData.data[i]);
+		}
+		let mask_data = singleChannelData.join(',');
+		
+		let xhr = new XMLHttpRequest();
+		xhr.open("POST", "/save_mask", true);
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		xhr.send("mask_data=" + mask_data + "&filename=mask.png" + "&width=" + finalCanvas.width + "&height=" + finalCanvas.height);
+	}
+
+    document.getElementById('fileInput').addEventListener('change', function (e) {
+        let reader = new FileReader();
+        reader.onload = function (event) {
+            img.onload = function () {
+                adjustCanvasDimensions();
+                drawImageWithAspectRatio();
+            }
+            img.src = event.target.result;
+        }
+
+        reader.readAsDataURL(e.target.files[0]);
+    }, false);
+
+</script>
+</body>
+</html>
