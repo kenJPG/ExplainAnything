@@ -1,7 +1,7 @@
 # Explain Anything
 Explaining any model through user-defined concepts
-
---- <br>
+---
+<br>
 
 ## Setup
 Dockerfile and run scripts are provided. Simply `docker build . -t explain_anything` and perform `sudo bash run_docker.sh`.
